@@ -86,21 +86,6 @@
             pointer-events: auto;
         }
 
-        /* Keep Google's helper UI hidden while using our own language selector. */
-        .google-translate-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            overflow: hidden;
-            opacity: 0;
-            pointer-events: none;
-        }
-        .goog-te-banner-frame.skiptranslate {
-            display: none !important;
-        }
-        body {
-            top: 0 !important;
-        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
@@ -886,8 +871,6 @@
 <!-- Підключаємо бібліотеку Axios для зручного відправлення запитів -->
 
 
-<div id="google_translate_element" class="google-translate-hidden" aria-hidden="true"></div>
-
 <!-- Підключення Axios -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
@@ -939,48 +922,237 @@
         });
 </script>
 <script>
-    const savedLanguage = localStorage.getItem('siteLanguage') || 'uk';
+    const translations = {
+        'Головна': ['Inicio', 'Strona główna'],
+        'Курси': ['Cursos', 'Kursy'],
+        'Англійська': ['Inglés', 'Angielski'],
+        'Англійська мова': ['Idioma inglés', 'Język angielski'],
+        'Німецька': ['Alemán', 'Niemiecki'],
+        'Німецька мова': ['Idioma alemán', 'Język niemiecki'],
+        'Чому ми': ['Por qué nosotros', 'Dlaczego my'],
+        'Відгуки': ['Opiniones', 'Opinie'],
+        'Безкоштовний урок': ['Lección gratuita', 'Darmowa lekcja'],
+        'Набір у нові онлайн-групи відкрито': ['Inscripciones abiertas para nuevos grupos online', 'Zapisy do nowych grup online są otwarte'],
+        'Відкрий світ нових можливостей з ': ['Abre un mundo de nuevas oportunidades con ', 'Otwórz świat nowych możliwości z '],
+        'Відкрий світ нових можливостей з': ['Abre un mundo de nuevas oportunidades con', 'Otwórz świat nowych możliwości z'],
+        'онлайн-репетиторами': ['tutores online', 'korepetytorami online'],
+        'англійську': ['inglés', 'angielskiego'],
+        'німецьку': ['alemán', 'niemieckiego'],
+        'та': ['y', 'i'],
+        'мови за авторською інInteractive-методикою з експертами та носіями мови.': ['idiomas con una metodología interactiva propia, expertos y hablantes nativos.', 'języków dzięki autorskiej metodzie interaktywnej, ekspertom i native speakerom.'],
+        'Сучасний репетиторський центр для дітей та дорослих. Опануйте': ['Centro moderno de tutoría para niños y adultos. Aprende', 'Nowoczesne centrum korepetycji dla dzieci i dorosłych. Opanuj'],
+        'Обрати свій курс': ['Elegir un curso', 'Wybierz kurs'],
+        'Спробувати безкоштовно': ['Probar gratis', 'Wypróbuj bezpłatnie'],
+        'Задоволених учнів': ['Alumnos satisfechos', 'Zadowolonych uczniów'],
+        'Склали ЄВІ/IELTS': ['Aprobaron EVI/IELTS', 'Zdali EVI/IELTS'],
+        'Топ-викладачів': ['Profesores expertos', 'Najlepszych nauczycieli'],
+        'від 280 грн': ['desde 280 UAH', 'od 280 UAH'],
+        'від 310 грн': ['desde 310 UAH', 'od 310 UAH'],
+        '/ урок': ['/ clase', '/ lekcja'],
+        'English Language': ['Idioma inglés', 'Język angielski'],
+        'Deutsch Kurse': ['Cursos de alemán', 'Kursy niemieckiego'],
+        'English Practice': ['Práctica de inglés', 'Praktyka angielskiego'],
+        'Deutsch Kurse': ['Cursos de alemán', 'Kursy niemieckiego'],
+        'Навчання з репетитором': ['Aprendizaje con tutor', 'Nauka z korepetytorem'],
+        'Speaking Club 24/7': ['Club de conversación 24/7', 'Klub konwersacyjny 24/7'],
+        'Курси вивчення іноземних мов': ['Cursos de idiomas extranjeros', 'Kursy języków obcych'],
+        'Обирай свій напрямок': ['Elige tu idioma', 'Wybierz swój język'],
+        'Програми розроблені з урахуванням європейських стандартів CEFR для швидкого досягнення реальних результатів.': ['Programas diseñados según los estándares europeos del MCER para lograr resultados reales rápidamente.', 'Programy opracowane zgodnie z europejskimi standardami CEFR, aby szybko osiągać realne rezultaty.'],
+        'Всі курси': ['Todos los cursos', 'Wszystkie kursy'],
+        '🇬🇧 Англійська': ['🇬🇧 Inglés', '🇬🇧 Angielski'],
+        '🇩🇪 Німецька': ['🇩🇪 Alemán', '🇩🇪 Niemiecki'],
+        '🇪🇸 Іспанська': ['🇪🇸 Español', '🇪🇸 Hiszpański'],
+        '🇵🇱 Польська': ['🇵🇱 Polaco', '🇵🇱 Polski'],
+        'Іспанська': ['Español', 'Hiszpański'],
+        'Іспанська мова': ['Idioma español', 'Język hiszpański'],
+        'Польська': ['Polaco', 'Polski'],
+        'Польська мова': ['Idioma polaco', 'Język polski'],
+        'Онлайн-англійська для будь-якого рівня': ['Inglés online para todos los niveles', 'Angielski online na każdym poziomie'],
+        'Німецька мова для життя, навчання та роботи': ['Alemán para la vida, los estudios y el trabajo', 'Niemiecki do życia, nauki i pracy'],
+        'Іспанська мова для подорожей і життя': ['Español para viajar y vivir', 'Hiszpański do podróży i życia'],
+        'Польська мова для навчання та роботи': ['Polaco para estudiar y trabajar', 'Polski do nauki i pracy'],
+        'A1-A2 Starter': ['A1-A2 Inicial', 'A1-A2 Początkujący'],
+        'B1-B2 Intermediate': ['B1-B2 Intermedio', 'B1-B2 Średniozaawansowany'],
+        'C1 Advanced': ['C1 Avanzado', 'C1 Zaawansowany'],
+        'A1-A2 Grundstufe': ['A1-A2 Básico', 'A1-A2 Podstawowy'],
+        'B1-B2 Mittelstufe': ['B1-B2 Intermedio', 'B1-B2 Średniozaawansowany'],
+        'C1 Oberstufe': ['C1 Avanzado', 'C1 Zaawansowany'],
+        'A1-A2 Inicial': ['A1-A2 Inicial', 'A1-A2 Początkujący'],
+        'B1-B2 Intermedio': ['B1-B2 Intermedio', 'B1-B2 Średniozaawansowany'],
+        'C1 Avanzado': ['C1 Avanzado', 'C1 Zaawansowany'],
+        'A1-A2 Podstawowy': ['A1-A2 Básico', 'A1-A2 Początkujący'],
+        'B1-B2 Średni': ['B1-B2 Intermedio', 'B1-B2 Średniozaawansowany'],
+        'C1 Zaawansowany': ['C1 Avanzado', 'C1 Zaawansowany'],
+        '1. Персоналізований трек': ['1. Ruta personalizada', '1. Indywidualna ścieżka'],
+        '2. Інтерактивна платформа': ['2. Plataforma interactiva', '2. Interaktywna platforma'],
+        '3. Сертифіковані викладачі': ['3. Profesores certificados', '3. Certyfikowani nauczyciele'],
+        '4. Гнучкий графік': ['4. Horario flexible', '4. Elastyczny grafik'],
+        '5. 80% Практики мовлення': ['5. 80% de práctica oral', '5. 80% praktyki mówienia'],
+        '6. Гарантія результату': ['6. Garantía de resultados', '6. Gwarancja wyniku'],
+        'Лише 5% кандидатів проходять наш відбір. Наші викладачі мають міжнародні сертифікати (CELTA, Delta, Goethe-Zertifikat) та досвід від 3+ років.': ['Solo el 5% de los candidatos supera nuestra selección. Nuestros profesores tienen certificados internacionales (CELTA, Delta, Goethe-Zertifikat) y más de 3 años de experiencia.', 'Tylko 5% kandydatów przechodzi naszą selekcję. Nasi nauczyciele mają międzynarodowe certyfikaty (CELTA, Delta, Goethe-Zertifikat) i ponad 3 lata doświadczenia.'],
+        'Обирайте зручний час для занять з 8:00 до 22:00. Легке скасування або перенесення уроку без втрати оплати за 4 години до початку.': ['Elige un horario cómodo de 8:00 a 22:00. Cancela o cambia la clase fácilmente sin perder el pago hasta 4 horas antes.', 'Wybierz dogodną godzinę zajęć od 8:00 do 22:00. Łatwe odwołanie lub przełożenie lekcji bez utraty opłaty do 4 godzin przed rozpoczęciem.'],
+        'Ми створили екосистему, яка гарантує стабільний прогрес без стресу та заучування.': ['Hemos creado un ecosistema que garantiza un progreso constante sin estrés ni memorización mecánica.', 'Stworzyliśmy ekosystem gwarantujący stały postęp bez stresu i mechanicznego zapamiętywania.'],
+        'Залиште заявку на сайті за 30 секунд.': ['Deja tu solicitud en el sitio en 30 segundos.', 'Zostaw zgłoszenie na stronie w 30 sekund.'],
+        'Безкоштовно визначимо ваш рівень та підберемо методику.': ['Evaluaremos tu nivel gratis y elegiremos el método adecuado.', 'Bezpłatnie określimy Twój poziom i dobierzemy metodę.'],
+        'Отримайте персональну програму під ваші цілі.': ['Recibe un programa personal adaptado a tus objetivos.', 'Otrzymaj indywidualny program dopasowany do swoich celów.'],
+        'Займайтеся у задоволення та досягайте бажаного рівню!': ['Disfruta del aprendizaje y alcanza el nivel deseado.', 'Ciesz się nauką i osiągnij wymarzony poziom!'],
+        'Отримайте перший урок та діагностику рівня безкоштовно!': ['¡Obtén tu primera clase y una evaluación de nivel gratis!', 'Otrzymaj pierwszą lekcję i bezpłatną ocenę poziomu!'],
+        'Визначте свої слабкі та сильні сторони у вивченні мови та отримайте план дій від нашого метадиста.': ['Descubre tus puntos fuertes y débiles y recibe un plan de acción de nuestro asesor.', 'Poznaj swoje mocne i słabe strony oraz otrzymaj plan działania od naszego doradcy.'],
+        'Онлайн-платформа для вивчення англійської та німецької мови з персональним репетитором.': ['Plataforma online para aprender inglés y alemán con un tutor personal.', 'Platforma online do nauki angielskiego i niemieckiego z osobistym korepetytorem.'],
+        'Англійська для дорослих': ['Inglés para adultos', 'Angielski dla dorosłych'],
+        'Підготовка до IELTS / TOEFL': ['Preparación para IELTS / TOEFL', 'Przygotowanie do IELTS / TOEFL'],
+        'Німецька A1–C2': ['Alemán A1–C2', 'Niemiecki A1–C2'],
+        'Переваги': ['Ventajas', 'Zalety'],
+        'Всі права захищені. Готовий шаблон для продажу.': ['Todos los derechos reservados. Plantilla lista para vender.', 'Wszelkie prawa zastrzeżone. Gotowy szablon do sprzedaży.'],
+        'Київ, Україна (Онлайн 24/7)': ['Kiev, Ucrania (Online 24/7)', 'Kijów, Ukraina (Online 24/7)'],
+        '"Готувалася до складання IELTS для вступу в нідерландський університет. За 4 місяці інтенсивних занять з репетитором підвищила бал з 5.5 до 7.5! Дуже вдячна за підтримку."': ['"Me preparé para el IELTS para entrar en una universidad neerlandesa. En 4 meses de clases intensivas aumenté mi puntuación de 5.5 a 7.5. ¡Muchas gracias por el apoyo!"', '„Przygotowywałam się do IELTS na studia w Holandii. W 4 miesiące intensywnej nauki podniosłam wynik z 5.5 do 7.5! Bardzo dziękuję za wsparcie.”'],
+        '"Німецьку починав вивчати з нуля для переїзду по роботі. Завдяки індивідуальному графіку та крутому репетитору склав Goethe-Zertifikat B1 всього за пів року!"': ['"Empecé a estudiar alemán desde cero para mudarme por trabajo. Gracias al horario individual y a un gran tutor, aprobé el Goethe-Zertifikat B1 en solo seis meses."', '„Zacząłem naukę niemieckiego od zera z powodu przeprowadzki do pracy. Dzięki indywidualnemu grafikowi i świetnemu korepetytorowi zdałem Goethe-Zertifikat B1 w zaledwie pół roku!”'],
+        '"Займаємося тут із сином (12 років) англійською. Йому дуже подобається інтерактивна платформа з ігровими завданнями. Оцінки в школі виросли до 11–12 балів."': ['"Estudiamos inglés aquí con mi hijo de 12 años. Le encanta la plataforma interactiva con ejercicios divertidos. Sus notas escolares subieron a 11-12."', '„Uczymy się tu angielskiego z 12-letnim synem. Bardzo podoba mu się interaktywna platforma z zadaniami w formie gier. Oceny w szkole wzrosły do 11–12.”'],
+        'Олена Ковальчук': ['Olena Kowalchuk', 'Olena Kowalczuk'],
+        'Максим Бойко': ['Maksym Boiko', 'Maksym Bojko'],
+        'Ірина Ткаченко': ['Iryna Tkachenko', 'Iryna Tkaczenko'],
+        'Англійська (IELTS 7.5)': ['Inglés (IELTS 7.5)', 'Angielski (IELTS 7.5)'],
+        'Німецька (Goethe B1)': ['Alemán (Goethe B1)', 'Niemiecki (Goethe B1)'],
+        'Англійська для дітей': ['Inglés para niños', 'Angielski dla dzieci'],
+        'Наш методист зв\'яжеться з вами найближчим часом для узгодження часу першого уроку.': ['Nuestro asesor se pondrá en contacto contigo pronto para acordar la hora de la primera clase.', 'Nasz doradca skontaktuje się z Tobą wkrótce, aby ustalić termin pierwszej lekcji.'],
+        'Розмовна англійська:': ['Inglés conversacional:', 'Angielski konwersacyjny:'],
+        'зняття бар\'єру за 2 місяці за рахунок 80% практики.': ['superar la barrera en 2 meses gracias a un 80% de práctica.', 'przełamanie bariery w 2 miesiące dzięki 80% praktyki.'],
+        'Підготовка до IELTS / TOEFL / ЄВІ:': ['Preparación para IELTS / TOEFL / EVI:', 'Przygotowanie do IELTS / TOEFL / EVI:'],
+        'гарантований бал за авторськими стратегіями.': ['una puntuación garantizada con estrategias propias.', 'gwarantowany wynik dzięki autorskim strategiom.'],
+        'Бізнес-англійська:': ['Inglés de negocios:', 'Angielski biznesowy:'],
+        'співбесіди, презентації, ділове листування, IT-термінологія.': ['entrevistas, presentaciones, correspondencia empresarial y terminología de TI.', 'rozmowy kwalifikacyjne, prezentacje, korespondencja biznesowa i terminologia IT.'],
+        'Англійська для дітей та підлітків:': ['Inglés para niños y adolescentes:', 'Angielski dla dzieci i młodzieży:'],
+        'ігрова форма, підвищення успішності у школі.': ['aprendizaje con juegos y mejores resultados en la escuela.', 'nauka przez zabawę i lepsze wyniki w szkole.'],
+        'Комплексні рівні A1–C2:': ['Niveles completos A1–C2:', 'Kompleksowe poziomy A1–C2:'],
+        'швидке проходження програм для переїзду та адаптації.': ['progreso rápido para mudarte y adaptarte.', 'szybkie przejście programu na potrzeby przeprowadzki i adaptacji.'],
+        'TestDaF & Goethe-Zertifikat:': ['TestDaF y Goethe-Zertifikat:', 'TestDaF i Goethe-Zertifikat:'],
+        'цільова підготовка до складання офіційних іспитів.': ['preparación específica para los exámenes oficiales.', 'ukierunkowane przygotowanie do egzaminów oficjalnych.'],
+        'Німецька для працевлаштування:': ['Alemán para el empleo:', 'Niemiecki do pracy:'],
+        'підготовка до співбесід у Німеччині, Австрії, Швейцарії.': ['preparación para entrevistas en Alemania, Austria y Suiza.', 'przygotowanie do rozmów w Niemczech, Austrii i Szwajcarii.'],
+        'Розмовні клуби:': ['Clubes de conversación:', 'Kluby konwersacyjne:'],
+        'жива практика з носіями мови з Берліна та Мюнхена.': ['práctica real con hablantes nativos de Berlín y Múnich.', 'praktyka z native speakerami z Berlina i Monachium.'],
+        'Розмовна практика:': ['Práctica oral:', 'Praktyka mówienia:'],
+        'навчання через діалоги та реальні життєві ситуації.': ['aprendizaje mediante diálogos y situaciones reales.', 'nauka poprzez dialogi i prawdziwe sytuacje życiowe.'],
+        'Іспанська для подорожей:': ['Español para viajar:', 'Hiszpański w podróży:'],
+        'корисна лексика для впевненого спілкування.': ['vocabulario útil para comunicarte con confianza.', 'przydatne słownictwo do swobodnej komunikacji.'],
+        'Культура та вимова:': ['Cultura y pronunciación:', 'Kultura i wymowa:'],
+        'зрозуміле пояснення особливостей мови.': ['explicación clara de las particularidades del idioma.', 'zrozumiałe wyjaśnienie specyfiki języka.'],
+        'Практична польська:': ['Polaco práctico:', 'Praktyczny polski:'],
+        'лексика для спілкування, документів і роботи.': ['vocabulario para la comunicación, documentos y trabajo.', 'słownictwo do komunikacji, dokumentów i pracy.'],
+        'Підготовка до іспитів:': ['Preparación para exámenes:', 'Przygotowanie do egzaminów:'],
+        'системна підготовка до сертифікації рівня.': ['preparación sistemática para la certificación del nivel.', 'systematyczne przygotowanie do certyfikacji poziomu.'],
+        'Правильна вимова:': ['Pronunciación correcta:', 'Prawidłowa wymowa:'],
+        'багато практики з викладачем на кожному занятті.': ['mucha práctica con el profesor en cada clase.', 'dużo praktyki z nauczycielem na każdej lekcji.'],
+        'Від подолання мовного бар\'єру до професійного володіння у міжнародних компаніях та успішного складання іспитів.': ['Desde superar la barrera del idioma hasta dominarlo profesionalmente en empresas internacionales y aprobar exámenes con éxito.', 'Od przełamania bariery językowej po profesjonalne posługiwanie się językiem w międzynarodowych firmach i zdawanie egzaminów.'],
+        'Ефективне вивчення граматики та лексики німецької мови з легкою подачею та підтримкою носіїв.': ['Aprendizaje eficaz de la gramática y el vocabulario alemán con explicaciones sencillas y apoyo de hablantes nativos.', 'Skuteczna nauka niemieckiej gramatyki i słownictwa dzięki prostym wyjaśnieniom i wsparciu native speakerów.'],
+        'Розвивайте живе мовлення, вивчайте граматику та впевнено спілкуйтеся іспанською з першого уроку.': ['Desarrolla el habla natural, aprende gramática y comunícate en español con confianza desde la primera clase.', 'Rozwijaj swobodną komunikację, ucz się gramatyki i mów po hiszpańsku z pewnością siebie od pierwszej lekcji.'],
+        'Опануйте польську для повсякденного життя, навчання, роботи та комфортного переїзду.': ['Aprende polaco para la vida cotidiana, los estudios, el trabajo y una mudanza cómoda.', 'Opanuj polski do codziennego życia, nauki, pracy i komfortowej przeprowadzki.'],
+        'Персоналізований трек': ['Ruta personalizada', 'Indywidualna ścieżka'],
+        'Інтерактивна платформа': ['Plataforma interactiva', 'Interaktywna platforma'],
+        'Сертифіковані викладачі': ['Profesores certificados', 'Certyfikowani nauczyciele'],
+        'Гнучкий графік': ['Horario flexible', 'Elastyczny grafik'],
+        '80% Практики мовлення': ['80% de práctica oral', '80% praktyki mówienia'],
+        'Гарантія результату': ['Garantía de resultados', 'Gwarancja wyniku'],
+        'Жодних стандартних занудних підручників. Репетитор будує програму під ваші особисті цілі: робота, переїзд, іспит або подорожі.': ['Nada de libros de texto aburridos y estándar. El tutor crea un programa según tus objetivos: trabajo, mudanza, examen o viajes.', 'Żadnych standardowych, nudnych podręczników. Korepetytor tworzy program dopasowany do Twoich celów: pracy, przeprowadzki, egzaminu lub podróży.'],
+        'Всі матеріали, домашні завдання, словниковий тренажер та записи уроків знаходяться в одному зручному особистому кабінеті 24/7.': ['Todos los materiales, tareas, ejercicios de vocabulario y grabaciones están en un cómodo panel personal disponible 24/7.', 'Wszystkie materiały, zadania domowe, trening słownictwa i nagrania lekcji znajdują się w jednym wygodnym panelu dostępnym 24/7.'],
+        'Ви починаєте говорити іноземною мовою вже з 1-го уроку. Безкоштовний доступ до щотижневих Speaking Clubs з носіями мови.': ['Empiezas a hablar un idioma extranjero desde la primera clase. Acceso gratuito a clubes de conversación semanales con hablantes nativos.', 'Zaczynasz mówić w języku obcym już od pierwszej lekcji. Bezpłatny dostęp do cotygodniowych klubów konwersacyjnych z native speakerami.'],
+        'Ми прозоро відстежуємо ваш прогрес за допомогою щомісячного тестування. Не підійшов викладач? Безкоштовно замінимо або повернемо кошти.': ['Seguimos tu progreso de forma transparente mediante pruebas mensuales. ¿El profesor no encaja? Lo cambiaremos gratis o te devolveremos el dinero.', 'Przejrzyście monitorujemy postępy za pomocą comiesięcznych testów. Nauczyciel nie pasuje? Bezpłatnie go zmienimy lub zwrócimy pieniądze.'],
+        'Записатися на тест-урок': ['Reservar una clase de prueba', 'Zapisz się na lekcję próbną'],
+        'Чому саме MovaMaster': ['Por qué MovaMaster', 'Dlaczego MovaMaster'],
+        'Плюси вивчання мов на нашому сайті': ['Ventajas de aprender idiomas con nosotros', 'Zalety nauki języków na naszej stronie'],
+        'Простий шлях до успіху': ['Un camino sencillo hacia el éxito', 'Prosta droga do sukcesu'],
+        'Як розпочати навчання за 4 кроки': ['Cómo empezar a aprender en 4 pasos', 'Jak rozpocząć naukę w 4 krokach'],
+        'Заявка': ['Solicitud', 'Zgłoszenie'],
+        'Тестовий урок': ['Clase de prueba', 'Lekcja próbna'],
+        'План навчання': ['Plan de aprendizaje', 'Plan nauki'],
+        'Результат': ['Resultado', 'Rezultat'],
+        'Історії успіху': ['Historias de éxito', 'Historie sukcesu'],
+        'Що про нас кажуть студенти': ['Lo que dicen nuestros estudiantes', 'Co mówią o nas uczniowie'],
+        'Спеціальна пропозиція': ['Oferta especial', 'Oferta specjalna'],
+        'Записатися зараз': ['Reservar ahora', 'Zapisz się teraz'],
+        'Запис на пробний урок': ['Reserva una clase de prueba', 'Zapis na lekcję próbną'],
+        'Ваше ім\'я': ['Tu nombre', 'Twoje imię'],
+        'Номер телефону': ['Número de teléfono', 'Numer telefonu'],
+        'Оберіть мову': ['Elige un idioma', 'Wybierz język'],
+        'Забронювати безкоштовно': ['Reservar gratis', 'Zarezerwuj bezpłatnie'],
+        'Дякуємо за заявку!': ['¡Gracias por tu solicitud!', 'Dziękujemy za zgłoszenie!'],
+        'Мова сайту': ['Idioma del sitio', 'Język strony'],
+        'Українська': ['Ucraniano', 'Ukraiński'],
+        'Ваше ім\'я': ['Tu nombre', 'Twoje imię'],
+        'Контакти': ['Contacto', 'Kontakt'],
+        'Навігація': ['Navegación', 'Nawigacja'],
+        'Переваги': ['Ventajas', 'Zalety'],
+        'Записатися': ['Reservar', 'Zapisz się']
+    };
+
     const languageSelectors = [
         document.getElementById('language-selector'),
         document.getElementById('language-selector-mobile')
     ].filter(Boolean);
+    const translatableNodes = [];
+    const translatableOptions = Array.from(document.querySelectorAll('#modal-lang-select option')).map(option => ({
+        option,
+        original: option.textContent
+    }));
+    const translatableAttributes = [
+        { element: document.querySelector('input[name="name"]'), attribute: 'placeholder', original: 'Олександр' },
+        { element: document.querySelector('input[name="phone"]'), attribute: 'placeholder', original: '+380 (99) 000-00-00' }
+    ];
+
+    function collectTranslatableNodes(element) {
+        element.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                const original = node.textContent;
+                translatableNodes.push({ node, original });
+            } else if (node.nodeType === Node.ELEMENT_NODE && !['SCRIPT', 'STYLE', 'SELECT'].includes(node.tagName)) {
+                collectTranslatableNodes(node);
+            }
+        });
+    }
+
+    collectTranslatableNodes(document.body);
 
     function setSiteLanguage(language) {
         localStorage.setItem('siteLanguage', language);
-        languageSelectors.forEach(selector => {
-            selector.value = language;
+        document.documentElement.lang = language;
+        languageSelectors.forEach(selector => selector.value = language);
+
+        translatableNodes.forEach(({ node, original }) => {
+            const trimmed = original.trim();
+            const translation = language === 'uk' ? trimmed : translations[trimmed]?.[language === 'es' ? 0 : 1];
+            if (translation) {
+                node.textContent = original.replace(trimmed, translation);
+            }
         });
 
-        if (language === 'uk') {
-            const translatedSelect = document.querySelector('.goog-te-combo');
-            if (translatedSelect) {
-                translatedSelect.value = 'uk';
-                translatedSelect.dispatchEvent(new Event('change'));
+        translatableOptions.forEach(({ option, original }) => {
+            const languageName = original.replace(/^[^ ]+ /, '');
+            const translation = language === 'uk' ? original : translations[languageName]?.[language === 'es' ? 0 : 1];
+            if (translation) {
+                option.textContent = original.replace(languageName, translation);
             }
-            return;
-        }
+        });
 
-        const translatedSelect = document.querySelector('.goog-te-combo');
-        if (translatedSelect) {
-            translatedSelect.value = language;
-            translatedSelect.dispatchEvent(new Event('change'));
-        }
+        translatableAttributes.forEach(({ element, attribute, original }) => {
+            if (element && language !== 'uk') {
+                element.setAttribute(attribute, language === 'es' && original === 'Олександр' ? 'Alejandro' : language === 'pl' && original === 'Олександр' ? 'Aleksander' : original);
+            } else if (element) {
+                element.setAttribute(attribute, original);
+            }
+        });
+
+        document.title = language === 'es'
+            ? 'MovaMaster — Escuela online de inglés y alemán'
+            : language === 'pl'
+                ? 'MovaMaster — Internetowa szkoła angielskiego i niemieckiego'
+                : 'MovaMaster — Онлайн-школа англійської та німецької мови';
     }
 
     languageSelectors.forEach(selector => {
         selector.addEventListener('change', event => setSiteLanguage(event.target.value));
     });
 
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-            pageLanguage: 'uk',
-            includedLanguages: 'uk,es,pl',
-            autoDisplay: false
-        }, 'google_translate_element');
-
-        setTimeout(() => setSiteLanguage(savedLanguage), 300);
-    }
+    setSiteLanguage(localStorage.getItem('siteLanguage') || 'uk');
 </script>
-<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
